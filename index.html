@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ahi Ocağı</title>
+<meta name="description" content="Ahi Ocağı: tarayıcıda oynanan, Osmanlı ve Türk halk masalları temalı demirci idle RPG.">
+<meta name="theme-color" content="#0f1a2e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 36 Q16 34 16 16 Q22 22 26 18 Q28 8 32 4 Q36 8 38 18 Q42 22 48 16 Q48 34 32 36 Z' fill='%23e8233a'/%3E%3Cpath d='M32 60 L32 34' stroke='%232f8a3a' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-ic" id="brandIc"></span><span>AHİ<br>OCAĞI</span></div>
+    <div class="res" id="goldBox" title="Altın"><span class="res-ic coin"></span><b id="gold">0</b></div>
+    <div class="res" id="hammerBox" title="Çekiç: aşama geçerek, düşmanlardan ve ocak dinlenince kazanılır"><span class="res-ic ham"></span><b id="hammers">0</b><small id="hammerTimer"></small></div>
+    <div class="res power" title="Güç"><span class="res-ic bolt">⚡</span><b id="power">0</b></div>
+    <button class="icon-btn" id="muteBtn" title="Ses">🔊</button>
+    <button class="icon-btn" id="helpBtn" title="Nasıl oynanır">?</button>
+    <button class="icon-btn" id="settingsBtn" title="Ayarlar">⚙</button>
+  </header>
+
+  <main class="layout">
+    <section class="battle" id="battleWrap">
+      <canvas id="scene"></canvas>
+      <div class="hud">
+        <div class="hud-top">
+          <div class="stage-pill"><span id="themeName">Söğüt Ovası</span><b id="stageName">1-1</b></div>
+          <div class="dots" id="stageDots"></div>
+        </div>
+        <div class="bars">
+          <div class="bar hero">
+            <div class="bar-label"><span>AKINCI</span><b id="heroHpTxt">0</b></div>
+            <div class="bar-track"><div id="heroHpLag" class="lag"></div><div id="heroHp" class="fill"></div></div>
+          </div>
+          <div class="bar enemy">
+            <div class="bar-label"><span id="enemyName">—</span><b id="enemyHpTxt">0</b></div>
+            <div class="bar-track"><div id="enemyHpLag" class="lag"></div><div id="enemyHp" class="fill"></div></div>
+          </div>
+        </div>
+        <div id="bossTimer" class="boss-timer hidden">30</div>
+        <button id="advanceBtn" class="advance hidden">İLERLE ⚔</button>
+        <div class="online-badge" title="Oyun açıkken %100, kapalıyken %80 verimle ilerler">● ÇEVRİMİÇİ %100</div>
+      </div>
+      <div id="fx"></div>
+      <div id="banner" class="banner"></div>
+      <div id="vignette"></div>
+    </section>
+
+    <aside class="side">
+      <nav class="tabs">
+        <button class="tab on" data-tab="gear">TEÇHİZAT</button>
+        <button class="tab" data-tab="pets">YOLDAŞ <i id="petBadge" class="badge hidden">!</i></button>
+      </nav>
+      <section class="gear panel" id="tab-gear">
+        <div class="gear-col" id="gearL"></div>
+        <div class="stats">
+          <div class="power-big"><small>GÜÇ</small><b id="power2">0</b></div>
+          <ul id="statList"></ul>
+          <button class="link-btn" id="allStatsBtn">Tüm özellikler ›</button>
+        </div>
+        <div class="gear-col" id="gearR"></div>
+      </section>
+      <section class="pets panel hidden" id="tab-pets"></section>
+
+      <section class="forge">
+        <div class="furnace" id="furnace">
+          <div class="fire"></div>
+          <canvas id="embers"></canvas>
+          <svg class="anvil-art" id="anvilArt" viewBox="0 0 200 110" aria-hidden="true">
+            <defs>
+              <linearGradient id="anvTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b93a8"/><stop offset="1" stop-color="#4a5064"/></linearGradient>
+              <linearGradient id="anvBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a5064"/><stop offset="1" stop-color="#262a38"/></linearGradient>
+              <radialGradient id="hot" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffb23a"/><stop offset="1" stop-color="#ff5a1a" stop-opacity="0"/></radialGradient>
+            </defs>
+            <ellipse cx="100" cy="104" rx="70" ry="6" fill="#0006"/>
+            <path d="M20 30 Q30 22 60 22 L160 22 Q182 22 186 30 L176 40 L140 42 Q128 46 126 56 L126 74 L148 92 L148 102 L52 102 L52 92 L74 74 L74 56 Q72 46 60 42 L36 40 Z" fill="url(#anvBody)" stroke="#14111f" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M20 30 Q30 22 60 22 L160 22 Q182 22 186 30 L176 36 L36 36 Z" fill="url(#anvTop)" stroke="#14111f" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M60 27 L150 27" stroke="#c9d0e0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+            <path d="M88 62 L100 54 L112 62 L100 70 Z M100 54 L100 70 M88 62 L112 62" fill="none" stroke="#c9a24a" stroke-width="2" opacity=".8"/>
+            <ellipse id="hotSpot" cx="104" cy="22" rx="26" ry="8" fill="url(#hot)" opacity="0"/>
+          </svg>
+          <svg class="hammer-art" id="hammerArt" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="54" y="30" width="12" height="84" rx="5" fill="#8a5a32" stroke="#14111f" stroke-width="4"/>
+            <rect x="57" y="34" width="4" height="74" rx="2" fill="#b98250"/>
+            <rect x="22" y="8" width="76" height="32" rx="6" fill="#5a6278" stroke="#14111f" stroke-width="4"/>
+            <rect x="26" y="12" width="68" height="8" rx="3" fill="#9aa3ba"/>
+          </svg>
+          <div class="forge-flash" id="forgeFlash"></div>
+          <div class="forge-title">AHİ OCAĞI</div>
+        </div>
+        <div class="forge-ctrl">
+          <button id="forgeLvlBtn" class="pill-btn">
+            <span class="lbl">OCAK</span><b id="forgeLvl">Sv. 1</b><small id="forgeUpState">Yükselt</small>
+          </button>
+          <button id="forgeBtn" class="big-forge">
+            <span class="bf-text">DÖV</span><span class="bf-cost"><i class="res-ic ham sm"></i>1</span>
+          </button>
+          <button id="autoBtn" class="pill-btn">
+            <span class="lbl">USTA KALFA</span><b id="autoState">KAPALI</b><small id="autoSub">Otomatik döv</small>
+          </button>
+        </div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<div id="reveal" class="reveal hidden"></div>
+<div id="modal" class="modal hidden"><div class="modal-card" id="modalCard"></div></div>
+<div id="screenFlash"></div>
+<div id="flyLayer"></div>
+<div id="toasts"></div>
+<noscript><p style="color:#fff;text-align:center">Ahi Ocağı için JavaScript gerekli.</p></noscript>
+
+<script src="lib/three.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
